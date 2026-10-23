@@ -1,0 +1,88 @@
+map $uri $feed_upstream {
+    default "";
+    ~^/api/hn/(?<hn_path>(?:topstories|newstories)\.json|item/[0-9]+\.json)$ https://hacker-news.firebaseio.com/v0/$hn_path;
+    /api/arxiv https://export.arxiv.org/api/query;
+    /api/github https://api.github.com/search/repositories;
+    /api/devto https://dev.to/api/articles;
+    /api/rss/openai https://openai.com/news/rss.xml;
+    /api/rss/google-ai https://blog.google/innovation-and-ai/technology/ai/rss/;
+    /api/rss/anthropic https://www.anthropic.com/rss.xml;
+    /api/rss/deepmind https://deepmind.google/blog/rss.xml;
+    /api/rss/cursor https://changelog.cursor.sh/feed.xml;
+    /api/rss/copilot https://github.blog/changelog/label/copilot/feed/;
+    /api/rss/fowler https://martinfowler.com/feed.atom;
+    /api/rss/pragmatic https://newsletter.pragmaticengineer.com/feed;
+    /api/rss/kent-dodds https://kentcdodds.com/blog/rss.xml;
+    /api/rss/overreacted https://overreacted.io/rss.xml;
+    /api/rss/cncf https://www.cncf.io/blog/feed/;
+    /api/rss/hashicorp https://www.hashicorp.com/blog/feed.xml;
+    /api/rss/kubernetes https://kubernetes.io/feed.xml;
+    /api/rss/aws https://aws.amazon.com/blogs/aws/feed/;
+    /api/rss/docker https://www.docker.com/blog/feed/;
+    /api/rss/krebs https://krebsonsecurity.com/feed/;
+    /api/rss/hacker-news https://feeds.feedburner.com/TheHackersNews;
+    /api/rss/schneier https://www.schneier.com/feed/;
+    /api/rss/owasp https://owasp.org/feed.xml;
+    /api/rss/vercel https://vercel.com/atom;
+    /api/rss/css-tricks https://css-tricks.com/feed/;
+    /api/rss/smashing https://www.smashingmagazine.com/feed/;
+    /api/rss/web-dev https://web.dev/feed.xml;
+    /api/rss/nextjs https://nextjs.org/feed.xml;
+}
+
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=300s ipv6=off;
+    resolver_timeout 5s;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header X-Frame-Options DENY always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location ^~ /api/ {
+        if ($feed_upstream = "") { return 404; }
+        limit_except GET { deny all; }
+        proxy_pass $feed_upstream$is_args$args;
+        proxy_http_version 1.1;
+        proxy_pass_request_headers off;
+        proxy_pass_request_body off;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header User-Agent "Pulse-News-Aggregator/1.0";
+        proxy_set_header Accept "application/json, application/atom+xml, application/rss+xml, application/xml, text/xml, */*";
+        proxy_set_header Connection "";
+        proxy_ssl_server_name on;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify_depth 5;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 12s;
+        proxy_redirect off;
+        proxy_hide_header Set-Cookie;
+        proxy_hide_header Content-Security-Policy;
+        proxy_cache pulse;
+        proxy_cache_key "$uri$is_args$args";
+        proxy_cache_valid 200 15m;
+        proxy_cache_lock on;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_ignore_headers Set-Cookie;
+    }
+
+    location = /api { return 404; }
+    location ~ /\. { deny all; }
+    location / {
+        limit_except GET { deny all; }
+        try_files $uri $uri/ =404;
+    }
+}

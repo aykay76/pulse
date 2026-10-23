@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Pulse - your technology news feed.">
+  <meta name="color-scheme" content="light dark">
+  <title>Pulse</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/wds/wds.css">
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/wds/wds.js"></script>
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="pulse-header">
+    <div class="pulse-header-inner">
+      <a class="pulse-brand" href="/">Pulse<span class="pulse-brand-dot" aria-hidden="true">.</span></a>
+      <span id="updated" class="pulse-muted" role="status">Your technology briefing</span>
+      <nav class="pulse-actions" aria-label="Feed actions">
+        <button id="refresh" class="wds-btn wds-btn--ghost wds-btn--icon" aria-label="Refresh feed" title="Refresh feed"><wds-icon name="refresh"></wds-icon></button>
+        <button id="show-starred" class="wds-btn wds-btn--secondary" aria-label="Starred articles"><wds-icon name="file" size="16"></wds-icon><span>Saved</span><span id="starred-count" class="wds-badge wds-badge--neutral">0</span></button>
+        <button id="show-export" class="wds-btn wds-btn--ghost wds-btn--icon" aria-label="Export starred articles" title="Export starred articles"><wds-icon name="download"></wds-icon></button>
+        <label class="pulse-theme"><span class="wds-label">Theme</span><select id="theme" class="wds-select" aria-label="Theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+      </nav>
+    </div>
+  </header>
+  <main class="pulse-main">
+    <section class="pulse-heading" aria-labelledby="feed-heading">
+      <div><p class="pulse-eyebrow">THE DAILY SIGNAL</p><h1 id="feed-heading">Your feed</h1></div>
+      <p id="topic-description" class="pulse-muted"></p>
+    </section>
+    <nav id="topics" class="pulse-topics" aria-label="Topics"></nav>
+    <section class="pulse-filters" aria-label="Article filters">
+      <label class="pulse-search"><wds-icon name="search" size="16"></wds-icon><input id="search" class="wds-input" type="search" placeholder="Search articles..." aria-label="Search articles"></label>
+      <select id="sort" class="wds-select" aria-label="Sort articles"><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="source">Group by source</option></select>
+      <label class="wds-checkbox"><input id="dismissed" type="checkbox">Dismissed</label>
+      <span id="article-count" class="pulse-muted" role="status"></span>
+    </section>
+    <nav id="sources" class="pulse-sources" aria-label="Sources"></nav>
+    <p id="feed-status" class="pulse-status" role="status" hidden></p>
+    <div id="articles" class="pulse-grid" aria-label="Articles" aria-busy="true"></div>
+    <noscript><p>JavaScript is required to load the news feed.</p></noscript>
+  </main>
+  <wds-drawer id="starred" heading="Starred articles" side="right" size="lg"><div id="starred-articles" class="pulse-saved-list"></div></wds-drawer>
+  <wds-modal id="notes" heading="Article notes" size="lg">
+    <h3 id="notes-title"></h3>
+    <div id="notes-list" class="wds-list"></div>
+    <form id="note-form" class="pulse-note-form">
+      <label class="wds-label" for="note-text">New note</label>
+      <textarea id="note-text" class="wds-input" rows="4" maxlength="10000" required></textarea>
+      <button class="wds-btn wds-btn--primary" type="submit"><wds-icon name="plus" size="16"></wds-icon>Add note</button>
+    </form>
+  </wds-modal>
+  <wds-modal id="export" heading="Export starred articles" size="sm">
+    <p id="export-count"></p>
+    <div class="pulse-export-actions">
+      <button class="wds-btn wds-btn--secondary" data-export="json"><wds-icon name="download" size="16"></wds-icon>JSON</button>
+      <button class="wds-btn wds-btn--secondary" data-export="md"><wds-icon name="download" size="16"></wds-icon>Markdown</button>
+    </div>
+  </wds-modal>
+</body>
+</html>

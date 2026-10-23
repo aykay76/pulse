@@ -1,35 +1,17 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine AS base
-RUN corepack enable
-WORKDIR /app
+FROM nginx:stable-alpine
 
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
 
-FROM base AS builder
-ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN pnpm build
+RUN rm /etc/nginx/conf.d/default.conf \
+    && chown nginx:nginx /etc/nginx/conf.d
 
-FROM node:22-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    HOSTNAME=0.0.0.0
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY public/ /usr/share/nginx/html/
+RUN rm -f /usr/share/nginx/html/tests.html /usr/share/nginx/html/tests.js
 
-RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
-
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER 1001
-EXPOSE 3000
-
-CMD ["node", "server.js"]
+USER nginx
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1
