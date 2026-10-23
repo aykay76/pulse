@@ -28,11 +28,11 @@ export function Header({
         {/* Logo and title */}
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-            AI
+            P
           </div>
           <div className="flex flex-col">
             <h1 className="font-semibold text-lg leading-none tracking-tight">
-              AI Pulse
+              Pulse
             </h1>
             {lastUpdated && (
               <span className="text-[10px] text-muted-foreground">

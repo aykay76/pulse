@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Pulse - Stay Ahead of AI & Engineering Trends',
+  title: 'Pulse - Stay Ahead of Technology Trends',
   description: 'Aggregate the latest AI and software engineering news from Hacker News, arXiv, GitHub, and more. Star, comment, and track breaking trends before they hit mainstream.',
   generator: 'v0.app',
   icons: {

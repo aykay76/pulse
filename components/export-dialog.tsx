@@ -57,7 +57,7 @@ export function ExportDialog({
     const content = JSON.stringify(exportData, null, 2);
     downloadFile(
       content,
-      `ai-pulse-starred-${new Date().toISOString().split("T")[0]}.json`,
+      `pulse-starred-${new Date().toISOString().split("T")[0]}.json`,
       "application/json"
     );
     onOpenChange(false);
@@ -65,7 +65,7 @@ export function ExportDialog({
 
   const exportAsMarkdown = () => {
     const lines: string[] = [
-      "# AI Pulse - Starred Articles",
+      "# Pulse - Starred Articles",
       "",
       `Exported on ${formatDate(new Date().toISOString())}`,
       "",
@@ -117,7 +117,7 @@ export function ExportDialog({
     const content = lines.join("\n");
     downloadFile(
       content,
-      `ai-pulse-starred-${new Date().toISOString().split("T")[0]}.md`,
+      `pulse-starred-${new Date().toISOString().split("T")[0]}.md`,
       "text/markdown"
     );
     onOpenChange(false);
